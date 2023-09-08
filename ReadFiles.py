@@ -141,7 +141,85 @@ def read_file(input_file_path):
 
     return combined_modified_log_text
 
+def read_data_tocsv(file_path):
+    
+    dataframe = pd.DataFrame(sample_for_eda(file_path, sample_size=1000000)) 
+    dataframe = dataframe.drop(dataframe.columns[0], axis=1)
+    dataframe.to_csv("/Users/anas/Documents/UoR/MSc Project/Report/Logs/SequentialEngineeringv3.csv")
 
+    return dataframe
+
+def read_samples_fromcsv():
+
+    df1 = pd.read_csv("/Users/anas/Documents/UoR/MSc Project/Report/Logs/FeatureEngineering1.csv")
+    df2 = pd.read_csv("/Users/anas/Documents/UoR/MSc Project/Report/Logs/FeatureEngineering2.csv")
+    df3 = pd.read_csv("/Users/anas/Documents/UoR/MSc Project/Report/Logs/FeatureEngineering3.csv")
+    
+    combined_df_all = pd.concat([df1, df2, df3], axis=0)
+
+    return combined_df_all
+
+
+def sample_for_eda(file_path, sample_size):
+    
+        # Read the text file
+    with open(file_path, 'r') as file:
+        data = file.read()
+
+    # Split the log content into individual logs based on '$startdate'
+        logs = data.split('$startdate=')
+
+        # Remove the empty string at the beginning
+        logs = [log for log in logs if log.strip()]
+       
+       # Add '$startdate=' back to each log entry
+        logs = ['$startdate=' + log for log in logs[:sample_size]]
+
+
+        sequential_logs = logs[:sample_size]
+
+        # Convert the list of logs to a single string
+        logs_as_string = '\n'.join(sequential_logs)
+
+    return logs_as_string, sequential_logs
+
+def process_data_to_dfv2(file_path):
+
+    df = pd.DataFrame()
+    data = []
+    text, lines = sample_for_eda(file_path, sample_size=100000)
+    
+    sampled_text_file = "/Users/anas/Documents/UoR/MSc Project/Data/sample_final_sequential_logs.txt"
+    
+    # Export extracted records raw data for future use
+    with open(sampled_text_file, 'w') as file:
+        file.write(text)
+
+
+    count = 0
+
+    for line in lines:
+        line = line.strip()
+        count += 1
+
+        if line:
+            pairs = line.split(';')
+            values = {}
+
+            for pair in pairs:
+                if '=' in pair:
+                    key, value = pair.split('=', 1)
+                    values[key] = value
+
+            data.append(values)
+
+    df = pd.DataFrame(data)
+        
+    # Export the file for future use for EDA - raw data
+    df.to_csv('/Users/anas/Documents/UoR/MSc Project/Report/Logs/SequentialEngineeringv3.csv')
+    print(df.info)
+
+    return df
 
 
 def process_data_to_df(file_path):
@@ -170,7 +248,7 @@ def process_data_to_df(file_path):
         df = pd.DataFrame(data)
         
         # Export the file for future use
-        df.to_csv('/Users/anas/Documents/UoR/MSc Project/Data/sampled_df.csv')
+        df.to_csv('/Users/anas/Documents/UoR/MSc Project/Data/sequential_sampled_df.csv')
         print(df.info)
 
     return df
@@ -289,27 +367,15 @@ def merge_data():
 
 def read_sequentialdata(file_path, sample_size, drop_keys):
 
-    # Define the input log file and output text file
-    output_text_file = "/Users/anas/Documents/UoR/MSc Project/Data/sample_final_sequential_logs.txt"
-
     # Read the text file
     with open(file_path, 'r') as file:
         data = file.read()
 
-     # Define the keys to remove
-        keys_to_remove = ['$age', '$reqno','$postprocessing','$elapsed','$status',
-                       '$reason','$system', '$online', '$Disk_files', 
-                       '$Fields_online', '$transfertime', '$readfiletime',
-                       '$queuetime','$bytes_offline','$fields_offline', '$tape_files',
-                       '$tapes', '$duplicates','$reason','$password','$expect','bytes', 'written'
-                       '$email'] + drop_keys
     # Split the log content into individual logs based on '$startdate'
         logs = data.split('$startdate=')
 
         # Remove the empty string at the beginning
         logs = [log for log in logs if log.strip()]
-
-        # Randomly select 500 logs
 
         sequential_logs = logs[:sample_size]
         
@@ -323,12 +389,12 @@ def read_sequentialdata(file_path, sample_size, drop_keys):
 
     # Iterate through each line and remove the specified keys and their values
             for line in lines:
-                for key in keys_to_remove:
+                for key in drop_keys:
                     line = re.sub(rf'{re.escape(key)}=\'[^\']+\'\s*;', '', line)
                 modified_log_lines.append(line)
-            # Iterate through each line and remove the specified keys and their values
-            for line in lines:
-                modified_log_lines.append(line)
+            
+            # for line in lines:
+            #     modified_log_lines.append(line)
 
             # Join the modified lines back into a single log
             modified_log = '\n'.join(modified_log_lines)
@@ -362,8 +428,9 @@ def read_total_logs(folder_path):
 
             print(f'Total number of logs: {len(logs)}')
             log_count += len(logs)
+        
             
-    print(f'Total number of logs in all files: {len(log_count)}')
+    print(f'Total number of logs in all files: {log_count}')
 
     return
 
