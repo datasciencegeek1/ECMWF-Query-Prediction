@@ -1,16 +1,5 @@
-import pandas as pd
-import time
-import warnings
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
-import numpy as np
-import re
-import pandas as pd
-import random
-import glob
-import ReadFiles as rf
-import os
+import pandas as pd, matplotlib.pyplot as plt, seaborn as sns, numpy as np, ReadFiles as rf
+import time, warnings, re, random, glob, os
 
 warnings.filterwarnings("ignore")
 
