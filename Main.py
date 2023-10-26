@@ -1,10 +1,5 @@
-import numpy as np
-import time
-import pandas as pd
-import matplotlib.pyplot as plt
-import glob
-import EDA as eda
-import ReadFiles as rf
+import numpy as np, pandas as pd, matplotlib as plt, EDA as eda, ReadFiles as rf
+import time, glob
 from tensorflow.keras.layers import LSTM, Dense, Embedding
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
